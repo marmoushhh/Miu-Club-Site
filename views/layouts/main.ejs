@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head', { 
+        title: typeof title !== 'undefined' ? title : 'MIU Clubs & Organizations',
+        path: typeof path !== 'undefined' ? path : '/'
+    }) %>
+</head>
+<body>
+    <%- include('../partials/spinner', { path: typeof path !== 'undefined' ? path : '/' }) %>
+    <%- include('../partials/topbar', { path: typeof path !== 'undefined' ? path : '/' }) %>
+    <%- include('../partials/navbar', { path: typeof path !== 'undefined' ? path : '/' }) %>
+    
+    <%- body %>
+    
+    <%- include('../partials/footer', { path: typeof path !== 'undefined' ? path : '/' }) %>
+    <%- include('../partials/scripts', { path: typeof path !== 'undefined' ? path : '/' }) %>
+</body>
+</html>

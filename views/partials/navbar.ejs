@@ -1,0 +1,74 @@
+<!-- Navbar Start -->
+<nav class="navbar navbar-expand-lg bg-white navbar-light sticky-top p-0" style="padding-bottom: 20px !important;">
+    <a href="/" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+        <img src="/img/logo-miu.png" alt="" style="height: 72px; margin-top: 20px;">
+    </a>
+    <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+        <div class="navbar-nav ms-auto p-4 p-lg-0 text-nav" style="margin-top: 20px; margin-right: 80px;">
+            <a href="/" class="nav-item nav-link <%= path === '/' ? 'active' : '' %>">Home</a>
+            <a href="/communities" class="nav-item nav-link <%= path === '/communities' ? 'active' : '' %>">Communities</a>
+            <a href="/our-clubs" class="nav-item nav-link <%= path === '/our-clubs' ? 'active' : '' %>">Our Clubs</a>
+            <a href="/join-us" class="nav-item nav-link <%= path === '/join-us' ? 'active' : '' %>">Join Us</a>
+            
+            <% if (user) { %>
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-user"></i> <%= user.username %>
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                        <% if (user.clubs && user.clubs.length > 0 && user.communityMember) { %>
+                            <li><a class="dropdown-item" href="/profile">My Profile</a></li>
+                            <li><a class="dropdown-item" href="/profile#clubs-section">My Clubs</a></li>
+                        <% } else { %>
+                            <li><a class="dropdown-item disabled" href="#" tabindex="-1" aria-disabled="true">My Profile</a></li>
+                            <li><a class="dropdown-item disabled" href="#" tabindex="-1" aria-disabled="true">My Clubs</a></li>
+                        <% } %>
+                        <li><a class="dropdown-item" href="/communities/community">My Communities</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form action="/auth/logout" method="POST" style="display: inline;">
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="fa-solid fa-sign-out-alt"></i> Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+                <div class="nav-item dropdown">
+                    <a class="nav-link position-relative" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" onclick="markNotificationsRead()">
+                        <i class="fa-solid fa-bell"></i>
+                        <% if (notifications && notifications.length > 0) { %>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.7em;">
+                                <%= notifications.length %>
+                            </span>
+                        <% } %>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end end-0" aria-labelledby="notifDropdown" style="min-width: 350px; max-width: 450px; right: 10px; left: auto; word-break: break-word; padding: 10px;">
+                        <li class="dropdown-header">Notifications</li>
+                        <% if (notifications && notifications.length > 0) { %>
+                            <% notifications.forEach(function(notif) { %>
+                                <li><span class="dropdown-item" style="white-space: normal; word-break: break-word; padding: 8px 12px;"><%= notif.message %><br><small class="text-muted"><%= new Date(notif.createdAt).toLocaleString() %></small></span></li>
+                            <% }); %>
+                        <% } else { %>
+                            <li><span class="dropdown-item text-muted">No new notifications</span></li>
+                        <% } %>
+                    </ul>
+                </div>
+                <script>
+                function markNotificationsRead() {
+                    fetch('/notifications/mark-read', { method: 'POST' })
+                        .then(() => { location.reload(); });
+                }
+                </script>
+            <% } else { %>
+                <a href="/auth/login" class="nav-item nav-link">
+                    <i class="fa-solid fa-lock"></i> Login
+                </a>
+            <% } %>
+        </div>
+    </div>
+</nav>
+<!-- Navbar End --> 

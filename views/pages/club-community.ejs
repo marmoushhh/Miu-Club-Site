@@ -1,0 +1,172 @@
+<%- include('../partials/head', { title: club.name + ' Community' }) %>
+<%- include('../partials/navbar', { path, user, notifications }) %>
+
+<body style="background: #fff; font-family: 'Roboto', 'Open Sans', Arial, sans-serif;">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <aside class="col-lg-3 d-none d-lg-block">
+                <div class="bg-white rounded-4 shadow-sm p-4 mb-4" style="position:sticky; top:30px;">
+                    <div class="text-center mb-4">
+                        <div class="fw-bold mt-2" style="color:#b51b1b;">MIU Clubs</div>
+                    </div>
+                    <nav class="nav flex-column nav-pills gap-2">
+                        <a href="/communities/<%= club.slug %>" class="nav-link rounded-pill <%= path === '/communities/' + club.slug ? 'active bg-primary text-white' : 'text-dark' %>"><i class="fa fa-home me-2"></i> Home</a>
+                        <a href="/notifications" class="nav-link rounded-pill text-dark"><i class="fa fa-bell me-2"></i> Notifications</a>
+                        <a href="/profile" class="nav-link rounded-pill text-dark"><i class="fa fa-user me-2"></i> Profile</a>
+                    </nav>
+                    <% if (user && membershipStatus === 'member') { %>
+                        <a href="#postForm" class="btn btn-danger rounded-pill w-100 mt-4 py-2 fw-bold shadow-sm">+ New Post</a>
+                    <% } %>
+                </div>
+            </aside>
+            <!-- Main Feed -->
+            <main class="col-lg-6 col-12 px-0">
+                <!-- Request to Join/Enter Community Button -->
+                <div class="text-center mb-4">
+                  <% if (!user) { %>
+                    <a href="/auth/login?redirect=/communities/<%= club.slug %>" class="btn btn-warning rounded-pill px-4 py-2 fw-bold shadow">Login to Request to Join</a>
+                  <% } else if (membershipStatus === 'not_member') { %>
+                    <form action="/communities/<%= club.slug %>/join" method="POST" style="display:inline;">
+                      <button type="submit" class="btn btn-danger rounded-pill px-4 py-2 fw-bold shadow">Request to Join</button>
+                    </form>
+                  <% } else if (membershipStatus === 'pending') { %>
+                    <button class="btn btn-secondary rounded-pill px-4 py-2 fw-bold shadow" disabled>Pending Approval</button>
+                  <% } %>
+                </div>
+                <!-- Postbox -->
+                <% if (user && membershipStatus === 'member') { %>
+                <div class="card mb-4 shadow-lg border-0 rounded-4" style="position:relative; z-index:2;">
+                    <div class="card-body p-4">
+                        <form id="postForm" action="/communities/community/posts" method="POST" enctype="multipart/form-data">
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="<%= user.avatar || '/img/default-avatar.jpg' %>" alt="User Avatar" class="rounded-circle me-3 border" style="width: 56px; height: 56px;">
+                                <input id="postText" name="content" type="text" class="form-control rounded-pill border-2" placeholder="What's happening?" required style="font-size: 1.1em;">
+                            </div>
+                            <div class="d-flex align-items-center gap-3 mt-2">
+                                <label for="postFile" class="btn btn-outline-danger rounded-pill mb-0"><i class="fa fa-paperclip me-2"></i>Attach File</label>
+                                <input id="postFile" name="media" type="file" accept="image/*,video/*" style="display: none;" onchange="showPostFileAttachment()" />
+                                <div id="file-attachment-message" class="text-muted"></div>
+                                <button type="submit" class="btn btn-primary rounded-pill ms-auto px-4 fw-bold">Post</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <% } %>
+                <!-- Posts -->
+                <div class="posts">
+                  <% posts.forEach(function(post) { %>
+                    <div class="card mb-4 shadow-sm border-0 rounded-4" data-post-id="<%= post._id %>">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-2">
+                                <a href="/users/<%= post.author.username %>"><img src="<%= post.author.avatar || '/img/default-avatar.jpg' %>" alt="User Avatar" class="rounded-circle me-3 border" style="width: 48px; height: 48px;"></a>
+                                <div class="flex-grow-1">
+                                    <span class="fw-bold" style="color: #b51b1b; font-size: 1.1em;"><%= post.author.username %></span>
+                                    <span class="text-muted ms-2" style="font-size: 0.95em;">@<%= post.author.username %></span>
+                                </div>
+                                <% if (user && String(post.author._id) === String(user.id)) { %>
+                                    <button class="btn btn-sm btn-outline-danger ms-2" title="Delete Post" onclick="deletePost('<%= post._id %>')"><i class="fa fa-trash"></i></button>
+                                    <button class="btn btn-sm btn-outline-secondary ms-2" title="Edit Post" onclick="editPost('<%= post._id %>')"><i class="fa fa-edit"></i></button>
+                                <% } %>
+                            </div>
+                            <div class="post__content mb-2" style="font-size: 1.15em;">
+                                <%= post.content %>
+                            </div>
+                            <% if (post.media) { %>
+                                <img src="<%= post.media %>" alt="Post Media" class="img-fluid rounded mb-2" style="max-width: 100%; height: auto;">
+                            <% } %>
+                            <div class="d-flex align-items-center mt-2 gap-3">
+                                <button class="btn btn-link text-danger p-0 social-action like-action rounded-circle <%= post.likedByCurrentUser ? 'liked' : '' %>" onclick="likePost(this, '<%= post._id %>')">
+                                    <i class="material-icons"><%= post.likedByCurrentUser ? 'favorite' : 'favorite_border' %></i> <span class="count"><%= post.likeCount %></span>
+                                </button>
+                                <button class="btn btn-link text-primary p-0 social-action comment-action rounded-circle" onclick="toggleComments(this)">
+                                    <i class="fa fa-comment"></i> <span class="count"><%= post.comments ? post.comments.length : 0 %></span>
+                                </button>
+                            </div>
+                            <div class="comments-section mt-3 p-3 rounded-3 bg-light border" style="display: none;">
+                                <% if (post.comments && post.comments.length > 0) { %>
+                                    <% post.comments.forEach(function(comment) { %>
+                                        <div class="d-flex align-items-start mb-2">
+                                            <a href="/users/<%= comment.author.username %>"><img src="<%= comment.author && comment.author.avatar ? comment.author.avatar : '/img/default-avatar.jpg' %>" alt="Comment Author" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit:cover;"></a>
+                                            <div>
+                                                <span class="fw-bold" style="color: #b51b1b; font-size: 1em;"><%= comment.author ? comment.author.username : 'Unknown' %></span>
+                                                <span class="text-muted ms-2" style="font-size: 0.9em;"><%= new Date(comment.createdAt).toLocaleDateString() %></span>
+                                                <div><%= comment.content %></div>
+                                            </div>
+                                        </div>
+                                    <% }); %>
+                                <% } %>
+                                <% if (user && membershipStatus === 'member') { %>
+                                    <form class="d-flex align-items-center mt-2 comment-form" onsubmit="return submitComment(this, '<%= post._id %>')">
+                                        <input type="text" class="form-control me-2 comment-input rounded-pill border-2" placeholder="Write a comment..." required />
+                                        <button type="submit" class="btn btn-primary rounded-pill">Post</button>
+                                    </form>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                  <% }); %>
+                </div>
+            </main>
+            <!-- Chat Popup -->
+            <aside class="col-lg-3 d-none d-lg-block position-relative">
+                <div class="bg-white rounded-4 shadow-sm p-4 mb-4" style="position:sticky; top:30px;">
+                    <div class="fw-bold mb-3" style="color:#b51b1b;">Community Members</div>
+                    <div class="community-members-list" style="max-height: 60vh; overflow-y: auto;">
+                        <% if (typeof communityMembers !== 'undefined' && communityMembers.length > 0) { %>
+                            <% communityMembers.forEach(function(member) { %>
+                                <div class="d-flex align-items-center mb-2">
+                                    <a href="/users/<%= member.username %>"><img src="<%= member.avatar || '/img/default-avatar.jpg' %>" alt="Avatar" class="rounded-circle me-2 border" style="width: 36px; height: 36px; object-fit:cover;"></a>
+                                    <span class="fw-bold" style="color: #333;"><%= member.username %></span>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <div class="text-muted">No members yet.</div>
+                        <% } %>
+                    </div>
+                </div>
+                <div id="chat-popup" style="display:none; position:fixed; top:120px; right:40px; z-index:1050; max-width:350px;">
+                    <div class="card shadow-lg chat-container rounded-4">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center rounded-top-4">
+                            <span>Chat</span>
+                            <span class="close-btn" onclick="closeChat()">✖</span>
+                        </div>
+                        <div class="chat-box card-body bg-light" id="chat-box">
+                            <!-- Messages appear here -->
+                        </div>
+                        <div class="chat-input card-footer bg-white rounded-bottom-4">
+                            <div class="input-row mb-2 d-flex align-items-center">
+                                <input type="text" id="message-input" class="form-control me-2 rounded-pill" placeholder="Type a message" />
+                                <button class="btn btn-primary rounded-pill" onclick="sendMessage()">Send</button>
+                            </div>
+                            <div class="input-row d-flex align-items-center">
+                                <input type="file" id="file-input" accept="image/*,.pdf,.doc,.docx,.txt" onchange="sendFile()" class="form-control me-2 rounded-pill" />
+                                <label for="file-input" class="btn btn-outline-secondary file-label mb-0 rounded-pill">📎 Attach</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+    <!-- Delete Post Confirmation Modal -->
+    <div class="modal fade" id="deletePostModal" tabindex="-1" aria-labelledby="deletePostModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deletePostModalLabel">Confirm Deletion</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to delete this post?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-danger" id="confirmDeletePostBtn">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="/js/clubcommunity.js"></script>
+</body>
+</html> 

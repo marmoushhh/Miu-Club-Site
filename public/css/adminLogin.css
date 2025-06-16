@@ -1,0 +1,101 @@
+ * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body  {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: url('img/misr_international_university_cover.jpg') no-repeat center center/cover;
+  backdrop-filter: blur(5px);
+  background-color: rgba(255, 255, 255, 0.2);
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.login-box {
+  background: #D2042D;
+  padding: 120px 40px;
+  border-radius: 45px;
+  color: white;
+  text-align: center;
+  width: 450px;
+  position: relative;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+}
+ .register-box {
+  background: #D2042D;
+  padding: 120px 40px;
+  border-radius: 45px;
+  color: white;
+  text-align: center;
+  width: 450px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+
+/* Input Fields */
+.input-group {
+  position: relative;
+  margin: 20px 0;
+}
+
+.input-group i {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  color: #999;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 10px 10px 10px 35px;
+  border: none;
+  border-bottom: 2px solid #fff;
+  background: transparent;
+  color: #fff;
+  outline: none;
+}
+
+/* Remember Me */
+.remember-me {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  margin: 15px 0;
+}
+
+.remember-me input {
+  margin-right: 10px;
+}
+
+/* Login Button */
+.login-button {
+  background-color: white;
+  color: #4a00e0;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 25px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: 0.3s ease;
+}
+
+.login-button:hover {
+  background-color: #ddd;
+}
+
+/* Forgot Password */
+.forgot-password {
+  margin-top: 20px;
+  font-size: 13px;
+  color: #eee;
+  cursor: pointer;
+}

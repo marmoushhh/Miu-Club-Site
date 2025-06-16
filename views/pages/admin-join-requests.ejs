@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: 'Join Requests' }) %>
+</head>
+<body>
+  <div class="container mt-4">
+    <h1 class="mb-4">Join Requests</h1>
+    <a href="/admin" class="btn btn-secondary mb-3">Back to Admin Panel</a>
+    <div id="adminJoinMsg"></div>
+    <% if (requests.length === 0) { %>
+      <p>No join requests found.</p>
+    <% } else { %>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Club</th>
+            <th>Status</th>
+            <th>Requested At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% requests.forEach(function(req) { %>
+            <tr id="row-<%= req._id %>">
+              <td><%= req.user ? req.user.username : '[deleted user]' %></td>
+              <td><%= req.user ? req.user.email : '-' %></td>
+              <td><%= req.club %></td>
+              <td id="status-<%= req._id %>"><%= req.status %></td>
+              <td><%= new Date(req.createdAt).toLocaleString() %></td>
+              <td>
+                <% if (req.status === 'pending') { %>
+                  <button class="btn btn-success btn-sm" onclick="handleJoinAction('<%= req._id %>', 'approve')">Approve</button>
+                  <button class="btn btn-danger btn-sm" onclick="handleJoinAction('<%= req._id %>', 'reject')">Reject</button>
+                <% } else { %>
+                  <span>-</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+  <script>
+    function handleJoinAction(id, action) {
+      fetch(`/join-requests/admin/join-requests/${id}/${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById('status-' + id).innerText = data.status;
+          document.getElementById('row-' + id).querySelectorAll('button').forEach(btn => btn.remove());
+          document.getElementById('adminJoinMsg').innerHTML = `<div class='alert alert-success'>Request ${action}ed successfully.</div>`;
+        } else {
+          document.getElementById('adminJoinMsg').innerHTML = `<div class='alert alert-danger'>${data.message || 'Error'}</div>`;
+        }
+      })
+      .catch(() => {
+        document.getElementById('adminJoinMsg').innerHTML = `<div class='alert alert-danger'>Server error.</div>`;
+      });
+    }
+  </script>
+  <%- include('../partials/scripts') %>
+</body>
+</html> 

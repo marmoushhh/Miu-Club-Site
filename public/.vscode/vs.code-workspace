@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "D:/vs"
+		},
+		{
+			"path": "../../twitcord-main"
+		},
+		{
+			"path": "../../Twitter-Clone-main"
+		},
+		{
+			"path": "../../twitter-ui-clone-main"
+		},
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "vs"
+	}
+}

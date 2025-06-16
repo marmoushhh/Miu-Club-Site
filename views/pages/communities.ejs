@@ -1,0 +1,79 @@
+<% let pageTitle = typeof title !== 'undefined' ? title : 'Communities'; %>
+<!-- Page Header Start -->
+<div class="container-fluid page-header py-5 mb-5">
+    <div class="container py-5">
+        <h1 class="display-3 text-white mb-3 animated slideInDown">Communities</h1>
+        <nav aria-label="breadcrumb animated slideInDown">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a class="text-white" href="/">Home</a></li>
+                <li class="breadcrumb-item text-white active" aria-current="page">Communities</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Community Join Button -->
+<% let pendingCommunityRequest = false; %>
+<% if (user && user.joinRequests) {
+  pendingCommunityRequest = user.joinRequests.some(r => r.type === 'community' && r.status === 'pending');
+} %>
+<div style="text-align:center; margin-bottom: 30px;">
+  <% if (!user) { %>
+    <!-- Not logged in -->
+    <a href="/auth/login?redirect=/communities" class="btn btn-warning">Login to Join Community</a>
+  <% } else if (!user.clubs || user.clubs.length === 0) { %>
+    <!-- No clubs -->
+    <button class="btn btn-secondary" disabled>You must join a club first</button>
+  <% } else if (user.communityMember) { %>
+    <!-- Community member -->
+    <a href="/communities/community" class="btn btn-primary">Enter Clubs Community</a>
+  <% } else if (pendingCommunityRequest) { %>
+    <!-- Pending request -->
+    <button class="btn btn-secondary" disabled>Your request is still pending</button>
+  <% } else { %>
+    <!-- Can request to join -->
+    <form action="/join-requests/community/join" method="POST" style="display:inline;">
+      <button type="submit" class="btn btn-success">Request to Join Community</button>
+    </form>
+  <% } %>
+</div>
+
+<% if (error) { %>
+  <div class="alert alert-danger"><%= error %></div>
+<% } %>
+<% if (success) { %>
+  <div class="alert alert-success"><%= success %></div>
+<% } %>
+
+<!-- You can add a description or info about the communities here -->
+<div class="communities-container">
+  <div class="communities-card">
+    <h2>Welcome to the MIU Communities!</h2>
+    <p>Join our shared community to connect, collaborate, and participate in all club activities.</p>
+  </div>
+</div>
+
+<!-- Chat pop up Start -->
+<div id="chat-popup" style=" display:none; position:fixed; top:100px; right:200px">
+  <div class="chat-container">
+    <div class="chat-header">Chat</div>
+    <div class="chat-box" id="chat-box">
+      <!-- Messages appear here -->
+    </div>
+    <div class="chat-input">
+      <div class="input-row">
+        <input type="text" id="message-input" placeholder="Type a message" />
+        <button onclick="sendMessage()">Send</button>
+      </div>
+      <div class="input-row">
+        <input type="file" id="file-input" accept="image/*,.pdf,.doc,.docx,.txt" onchange="sendFile()" />
+        <label for="file-input" class="file-label">📎 Attach</label>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Chat pop up End -->
+
+
+<% /* Remove debug output and polling script */ %> 

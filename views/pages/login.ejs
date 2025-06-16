@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head', { title: 'Login' }) %>
+    <style>
+        body {
+            background: #fff !important;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/spinner') %>
+    
+    <!-- Page Header Start -->
+    <div class="container-fluid page-header py-5 mb-5">
+        <div class="container py-5">
+            <h1 class="display-3 text-white mb-3 animated slideInDown">Login</h1>
+            <nav aria-label="breadcrumb animated slideInDown">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a class="text-white" href="/">Home</a></li>
+                    <li class="breadcrumb-item text-white active" aria-current="page">Login</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <!-- Page Header End -->
+
+    <!-- Login Form Start -->
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body p-5">
+                            <h3 class="text-center mb-4">Login to Your Account</h3>
+                            <form action="/auth/login" method="POST">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email address</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                </div>
+                                <div class="remember-me">
+                                    <input type="checkbox" id="remember" name="remember" />
+                                    <label for="remember">Remember me</label>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">Login</button>
+                                </div>
+                                <% if (error) { %>
+                                    <div id="loginMessage" style="margin-top: 10px; color: yellow;"><%= error %></div>
+                                <% } %>
+                                <% if (success) { %>
+                                    <div id="loginMessage" style="margin-top: 10px; color: lightgreen;"><%= success %></div>
+                                <% } %>
+                                <p class="mt-3 mb-1" style="font-size: 1.1em; font-weight: bold; color: #b51b1b;">Don't have an account?</p>
+                                <div class="d-flex gap-2 mb-2">
+                                    <a href="/auth/register"><button type="button" class="btn btn-secondary">Register</button></a>
+                                    <a href="/auth/admin-login"><button type="button" class="btn btn-secondary ms-2">Login as Admin</button></a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Login Form End -->
+    
+    <%- include('../partials/scripts') %>
+</body>
+</html> 

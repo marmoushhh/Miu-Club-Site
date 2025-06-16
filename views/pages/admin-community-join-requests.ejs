@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: 'Community Join Requests' }) %>
+</head>
+<body>
+  <div class="container mt-4">
+    <h1 class="mb-4">Community Join Requests</h1>
+    <a href="/admin" class="btn btn-secondary mb-3">Back to Admin Panel</a>
+    <div id="adminJoinMsg"></div>
+    <% if (requests.length === 0) { %>
+      <p>No community join requests found.</p>
+    <% } else { %>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Requested At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% requests.forEach(function(req) { %>
+            <tr id="row-<%= req._id %>">
+              <td><%= req.user.username %></td>
+              <td><%= req.user.email %></td>
+              <td id="status-<%= req._id %>"><%= req.status %></td>
+              <td><%= new Date(req.createdAt).toLocaleString() %></td>
+              <td>
+                <% if (req.status === 'pending') { %>
+                  <button class="btn btn-success btn-sm" onclick="handleJoinAction('<%= req._id %>', 'approve')">Approve</button>
+                  <button class="btn btn-danger btn-sm" onclick="handleJoinAction('<%= req._id %>', 'reject')">Reject</button>
+                <% } else { %>
+                  <span>-</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+  <script>
+    async function handleJoinAction(id, action) {
+      try {
+        // Show loading state
+        const row = document.getElementById('row-' + id);
+        const buttons = row.querySelectorAll('button');
+        buttons.forEach(btn => btn.disabled = true);
+        
+        // Make the API call
+        const response = await fetch(`/join-requests/admin/community-join-requests/${id}/${action}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Update the status in the UI
+          document.getElementById('status-' + id).innerText = data.status;
+          
+          // Remove the action buttons
+          buttons.forEach(btn => btn.remove());
+          
+          if (action === 'approve') {
+            // Show success message
+            document.getElementById('adminJoinMsg').innerHTML = `
+              <div class='alert alert-success'>
+                Request approved successfully. User is now a community member.
+              </div>`;
+            
+            // If this is the logged-in user, update their session
+            if (data.userId === '<%= user.id %>') {
+              // Update session
+              await fetch('/join-requests/update-session-community', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+              });
+              
+              // Reload the page after a short delay
+              setTimeout(() => window.location.reload(), 1500);
+            }
+          } else {
+            document.getElementById('adminJoinMsg').innerHTML = `
+              <div class='alert alert-success'>
+                Request ${action}ed successfully.
+              </div>`;
+          }
+        } else {
+          throw new Error(data.message || 'Error processing request');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('adminJoinMsg').innerHTML = `
+          <div class='alert alert-danger'>
+            ${error.message || 'Server error occurred'}
+          </div>`;
+        
+        // Re-enable buttons on error
+        const buttons = document.getElementById('row-' + id).querySelectorAll('button');
+        buttons.forEach(btn => btn.disabled = false);
+      }
+    }
+  </script>
+  <%- include('../partials/scripts') %>
+</body>
+</html> 

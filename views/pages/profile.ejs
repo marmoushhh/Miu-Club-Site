@@ -1,0 +1,228 @@
+<%- include('../partials/head', { title: title }) %>
+<link rel="stylesheet" href="/css/profile.css">
+
+
+<div class="container py-5">
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <%= error %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
+  <% if (typeof success !== 'undefined' && success) { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <%= success %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
+ 
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10 col-12">
+      <!-- Back to Feed Button -->
+      <div class="mb-4 d-flex justify-content-start">
+        <a href="/communities/community" class="btn btn-danger btn-lg rounded-pill px-4 fw-bold">
+          <i class="fa fa-arrow-left me-2"></i> Back to Feed
+        </a>
+      </div>
+      <div class="profile-banner position-relative mb-5">
+        <div class="profile-avatar position-relative" style="cursor:pointer;">
+          <img src="<%= profileUser.avatar || '/img/default-avatar.jpg' %>" alt="Avatar">
+          <% if (String(profileUser._id) === String(user && user.id)) { %>
+            <div id="editAvatarOverlay" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); color:#fff; border-radius:50%; align-items:center; justify-content:center; font-weight:bold; font-size:1.1em; z-index:10;">
+              <span style="width:100%; text-align:center; display:block; margin-top:40px;">Edit Avatar</span>
+            </div>
+          <% } %>
+        </div>
+        <% if (String(profileUser._id) === String(user && user.id)) { %>
+          <button class="edit-profile-btn" id="editProfileBtn" type="button">Edit Profile</button>
+        <% } %>
+      </div>
+      <div class="profile-info text-center mb-4">
+        <div class="profile-name"><%= profileUser.username %></div>
+        <div class="profile-bio"><%= profileUser.bio || 'No bio yet.' %></div>
+        <div class="profile-metadata d-flex justify-content-center gap-4">
+          <div class="metadata-item">
+            <i class="fa fa-calendar"></i>
+            Joined <%= new Date(profileUser.createdAt).toLocaleDateString() %>
+          </div>
+          <div class="metadata-item">
+            <i class="fa fa-users"></i>
+            Member of <%= profileUser.clubs.length %> club<%= profileUser.clubs.length === 1 ? '' : 's' %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Club Roles & Achievements Suggestions -->
+      <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+          <div class="info-section">
+            <div class="section-title"><i class="fa fa-user-tie me-2"></i>Club Roles</div>
+            <div class="info-value text-muted">(Coming soon: Display user's roles in each club, e.g., President, Member, etc.)</div>
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <div class="info-section">
+            <div class="section-title"><i class="fa fa-trophy me-2"></i>Achievements</div>
+            <div class="info-value text-muted">(Coming soon: Badges for club participation, events, or milestones!)</div>
+          </div>
+        </div>
+      </div>
+
+      <% if (String(profileUser._id) === String(user && user.id)) { %>
+      <!-- Edit Avatar Modal -->
+      <div id="editAvatarModal" class="modal" tabindex="-1" style="display:none; background:rgba(0,0,0,0.5); position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:2000; align-items:center; justify-content:center;">
+        <div class="modal-dialog" style="max-width:400px; margin:auto;">
+          <div class="modal-content p-4 rounded-4">
+            <h4 class="mb-3">Edit Avatar</h4>
+            <form action="/profile/edit" method="POST" enctype="multipart/form-data">
+              <div class="mb-3 text-center">
+                <img src="<%= profileUser.avatar || '/img/default-avatar.jpg' %>" alt="Current Avatar" class="rounded-circle mb-2" style="width:80px; height:80px; object-fit:cover;">
+                <input type="file" name="avatar" accept="image/*" class="form-control mt-2" required>
+              </div>
+              <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-secondary" id="cancelEditAvatar">Cancel</button>
+                <button type="submit" class="btn btn-danger">Save Avatar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <!-- Edit Profile Modal/Form (Bio & Password) -->
+      <div id="editProfileModal" class="modal" tabindex="-1" style="display:none; background:rgba(0,0,0,0.5); position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:2000; align-items:center; justify-content:center;">
+        <div class="modal-dialog" style="max-width:400px; margin:auto;">
+          <div class="modal-content p-4 rounded-4">
+            <h4 class="mb-3">Edit Profile</h4>
+            <form action="/profile/edit-bio" method="POST">
+              <div class="mb-3">
+                <label for="bio" class="form-label">Bio</label>
+                <textarea name="bio" id="bio" class="form-control" rows="3" maxlength="200"><%= profileUser.bio %></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">New Password</label>
+                <input type="password" name="password" id="password" class="form-control" minlength="6" placeholder="Leave blank to keep current password">
+              </div>
+              <div class="mb-3">
+                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                <input type="password" name="confirmPassword" id="confirmPassword" class="form-control" minlength="6" placeholder="Confirm new password">
+              </div>
+              <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-secondary" id="cancelEditProfile">Cancel</button>
+                <button type="submit" class="btn btn-danger">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <% } %>
+
+      <div class="profile-tabs d-flex justify-content-center">
+        <div class="tab active">Clubs</div>
+        <div class="tab">Posts</div>
+      </div>
+
+      <div class="tab-content active" id="clubs-section" style="scroll-margin-top: 120px;">
+        <% if (profileUser.clubs.length === 0) { %>
+          <div class="info-section text-center">Not a member of any clubs yet.</div>
+        <% } else { %>
+          <% profileUser.clubs.forEach(function(clubObj) { %>
+            <% if (clubObj.club) { %>
+            <div class="club-card">
+              <div class="club-avatar">
+                <img src="<%= clubObj.club.logo || '/img/default-club.png' %>" alt="<%= clubObj.club.name %>">
+              </div>
+              <div class="club-info">
+                <div class="club-name"><%= clubObj.club.name %></div>
+                <div class="club-meta">
+                  <span>Joined <%= clubObj.joinedAt ? new Date(clubObj.joinedAt).toLocaleDateString() : '' %></span>
+                </div>
+                <div class="club-description"><%= clubObj.club.description %></div>
+              </div>
+            </div>
+            <% } %>
+          <% }); %>
+        <% } %>
+      </div>
+
+      <div class="tab-content" id="posts-tab">
+        <% if (posts.length === 0) { %>
+          <div class="info-section text-center">No posts yet.</div>
+        <% } else { %>
+          <% posts.forEach(function(post) { %>
+            <div class="card mb-4 shadow-sm border-0 rounded-4">
+              <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-2">
+                  <img src="<%= profileUser.avatar || '/img/default-avatar.jpg' %>" alt="User Avatar" class="rounded-circle me-3 border" style="width: 48px; height: 48px;">
+                  <div>
+                    <span class="fw-bold" style="color: #b51b1b; font-size: 1.1em;"><%= profileUser.username %></span>
+                    <span class="text-muted ms-2" style="font-size: 0.95em;">@<%= profileUser.username %></span>
+                    <% if (post.club) { %>
+                      <span class="badge bg-secondary ms-2"><%= post.club.name %></span>
+                    <% } %>
+                  </div>
+                </div>
+                <div class="mb-2" style="font-size: 1.15em;">
+                  <%= post.content %>
+                </div>
+                <% if (post.media) { %>
+                  <img src="<%= post.media %>" alt="Post Media" class="img-fluid rounded mb-2" style="max-width: 100%; height: auto;">
+                <% } %>
+                <div class="text-muted" style="font-size: 0.95em;">
+                  <i class="fa fa-clock me-1"></i> <%= new Date(post.createdAt).toLocaleString() %>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Tab switching logic
+const tabs = document.querySelectorAll('.tab');
+const tabContents = document.querySelectorAll('.tab-content');
+tabs.forEach((tab, idx) => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tabContents.forEach(tc => tc.classList.remove('active'));
+    tab.classList.add('active');
+    tabContents[idx].classList.add('active');
+  });
+});
+
+// Avatar hover logic
+const avatarDiv = document.querySelector('.profile-avatar');
+const editAvatarOverlay = document.getElementById('editAvatarOverlay');
+const editAvatarModal = document.getElementById('editAvatarModal');
+if (avatarDiv && editAvatarOverlay) {
+  avatarDiv.addEventListener('mouseenter', () => { editAvatarOverlay.style.display = 'flex'; });
+  avatarDiv.addEventListener('mouseleave', () => { editAvatarOverlay.style.display = 'none'; });
+  avatarDiv.addEventListener('click', () => { if (editAvatarOverlay.style.display === 'flex') editAvatarModal.style.display = 'flex'; });
+}
+const cancelEditAvatar = document.getElementById('cancelEditAvatar');
+if (cancelEditAvatar && editAvatarModal) {
+  cancelEditAvatar.onclick = () => { editAvatarModal.style.display = 'none'; };
+}
+
+// Edit Profile Modal logic
+const editBtn = document.getElementById('editProfileBtn');
+const modal = document.getElementById('editProfileModal');
+const cancelBtn = document.getElementById('cancelEditProfile');
+if (editBtn && modal) {
+  editBtn.onclick = () => { modal.style.display = 'flex'; };
+}
+if (cancelBtn && modal) {
+  cancelBtn.onclick = () => { modal.style.display = 'none'; };
+}
+window.onclick = function(event) {
+  if (event.target === modal) { modal.style.display = 'none'; }
+  if (event.target === editAvatarModal) { editAvatarModal.style.display = 'none'; }
+};
+</script>
+
+<%- include('../partials/footer') %>
+
+
+
+ 

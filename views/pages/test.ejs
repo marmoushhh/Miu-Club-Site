@@ -1,0 +1,28 @@
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="card-title">EJS Test Page</h1>
+                    <p class="card-text"><%= message %></p>
+                    <p class="card-text">Current time: <%= currentTime %></p>
+                    
+                    <!-- Testing EJS features -->
+                    <div class="mt-4">
+                        <h3>Testing EJS Features:</h3>
+                        <ul>
+                            <li>Variable output: <%= message %></li>
+                            <li>HTML escaping: <%- '<strong>This should be bold</strong>' %></li>
+                            <li>JavaScript in EJS: <% if(currentTime) { %>
+                                Time is available!
+                                <% } else { %>
+                                No time available
+                                <% } %>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 
