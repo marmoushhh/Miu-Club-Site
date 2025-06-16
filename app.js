@@ -11,13 +11,24 @@ const { setUserLocals } = require('./server/middleware/auth');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-// Enable CORS for all origins
-app.use(cors());
+// Enable CORS with specific options
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Basic request logging middleware
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+});
+
 app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session setup
+// Session setup with more options
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
@@ -28,7 +39,9 @@ app.use(session({
     }),
     cookie: {
         secure: process.env.NODE_ENV === 'production',
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        sameSite: 'lax',
+        httpOnly: true
     }
 }));
 
@@ -57,17 +70,28 @@ app.use('/admin', require('./server/routes/admin'));
 
 // Basic health check route
 app.get('/health', (req, res) => {
-    res.status(200).json({ 
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-        env: process.env.NODE_ENV,
-        port: PORT
-    });
+    try {
+        res.status(200).json({ 
+            status: 'ok',
+            timestamp: new Date().toISOString(),
+            env: process.env.NODE_ENV,
+            port: PORT,
+            session: req.session ? 'active' : 'none'
+        });
+    } catch (error) {
+        console.error('Health check error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 // Test route
 app.get('/test', (req, res) => {
-    res.send('Test route working!');
+    try {
+        res.send('Test route working!');
+    } catch (error) {
+        console.error('Test route error:', error);
+        res.status(500).send('Internal server error');
+    }
 });
 
 // Connect to MongoDB Atlas
