@@ -55,7 +55,7 @@ app.use('/admin', require('./server/routes/admin'));
 // Connect to MongoDB Atlas
 mongoose.connect(process.env.MONGODB_URI).then(() => {
     console.log('Connected to MongoDB Atlas');
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
         console.log(`App listening on port ${PORT}`);
     });
 }).catch((err) => {
