@@ -38,14 +38,14 @@ app.set('layout', './layouts/main');
 app.set('view engine', 'ejs');
 
 // Test route for EJS
-app.get('/test-ejs', (req, res) => {
-    res.render('pages/test', {
-        title: 'EJS Test Page',
-        message: 'If you can see this, EJS is working!',
-        currentTime: new Date().toLocaleString(),
-        path: '/test-ejs'
-    });
-});
+//app.get('/test-ejs', (req, res) => {
+   // res.render('pages/test', {
+     //   title: 'EJS Test Page',
+     //   message: 'If you can see this, EJS is working!',
+      ///  currentTime: new Date().toLocaleString(),
+    //    path: '/test-ejs'
+  //  });
+//});
 
 app.use('/', require('./server/routes/main'));
 app.use('/auth', require('./server/routes/auth'));
