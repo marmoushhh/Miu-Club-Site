@@ -22,10 +22,18 @@ exports.isAdmin = (req, res, next) => {
 exports.setUserLocals = async (req, res, next) => {
     if (req.session.user) {
         try {
-            const user = await User.findById(req.session.user.id).populate('clubs.club').lean();
+            // Set a timeout for the database operations
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Database operation timed out')), 5000)
+            );
+
+            const userPromise = User.findById(req.session.user.id).populate('clubs.club').lean();
+            const user = await Promise.race([userPromise, timeoutPromise]);
+
             if (user) {
                 // Fetch join requests for this user
-                const joinRequests = await JoinRequest.find({ user: user._id }).lean();
+                const joinRequestsPromise = JoinRequest.find({ user: user._id }).lean();
+                const joinRequests = await Promise.race([joinRequestsPromise, timeoutPromise]);
                 
                 // Create a complete user object with all necessary data
                 const sessionUser = {
@@ -47,9 +55,10 @@ exports.setUserLocals = async (req, res, next) => {
                 res.locals.user = sessionUser;
                 
                 // Fetch unread notifications
-                res.locals.notifications = await Notification.find({ user: user._id, read: false })
+                const notificationsPromise = Notification.find({ user: user._id, read: false })
                     .sort({ createdAt: -1 })
                     .lean();
+                res.locals.notifications = await Promise.race([notificationsPromise, timeoutPromise]);
             } else {
                 req.session.user = null;
                 res.locals.user = null;
@@ -57,6 +66,7 @@ exports.setUserLocals = async (req, res, next) => {
             }
         } catch (err) {
             console.error('Error in setUserLocals:', err);
+            // On error, keep the existing session data but don't update it
             res.locals.user = req.session.user;
             res.locals.notifications = [];
         }
