@@ -31,68 +31,77 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Home page
-router.get('/', (req, res) => {
-    const clubs = [
-        {
-            name: 'ACPC',
-            img: '/img/download.png',
-            url: '/clubs/acpc',
-            alt: 'ACPC Photo'
-        },
-        {
-            name: 'Enactus',
-            img: '/img/Enactus-01.jpg',
-            url: '/clubs/enactus',
-            alt: 'Enactus Photo'
-        },
-        {
-            name: 'TEDx',
-            img: '/img/TEDxCairoUni.jpg',
-            url: '/clubs/tedx',
-            alt: 'TEDx Photo'
-        },
-        {
-            name: 'MUN',
-            img: '/img/MUN-01.jpg',
-            url: '/clubs/mun',
-            alt: 'MUN Photo'
-        },
-        {
-            name: 'Gamers Legacy',
-            img: '/img/Gamers-01.jpg',
-            url: '/clubs/gamers-legacy',
-            alt: 'Gamers Legacy Photo'
-        },
-        {
-            name: 'Tunners',
-            img: '/img/Tuners-03.jpg',
-            url: '/clubs/tunners',
-            alt: 'Tunners Photo'
-        },
-        {
-            name: 'El Warsha',
-            img: '/img/warsha-03.jpg',
-            url: '/clubs/el-warsha',
-            alt: 'El Warsha Photo'
-        },
-        {
-            name: 'MOVE',
-            img: '/img/Move-03.jpg',
-            url: '/clubs/move',
-            alt: 'MOVE Photo'
-        },
-        {
-            name: 'IHEPC',
-            img: '/img/IHEPC-03.jpg',
-            url: '/clubs/ihepc',
-            alt: 'IHEPC Photo'
-        }
-    ];
-    res.render('pages/index', { 
-        title: 'MIU Clubs & Organizations',
-        path: '/',
-        clubs
-    });
+router.get('/', async (req, res) => {
+    try {
+        const clubs = [
+            {
+                name: 'ACPC',
+                img: '/img/download.png',
+                url: '/clubs/acpc',
+                alt: 'ACPC Photo'
+            },
+            {
+                name: 'Enactus',
+                img: '/img/Enactus-01.jpg',
+                url: '/clubs/enactus',
+                alt: 'Enactus Photo'
+            },
+            {
+                name: 'TEDx',
+                img: '/img/TEDxCairoUni.jpg',
+                url: '/clubs/tedx',
+                alt: 'TEDx Photo'
+            },
+            {
+                name: 'MUN',
+                img: '/img/MUN-01.jpg',
+                url: '/clubs/mun',
+                alt: 'MUN Photo'
+            },
+            {
+                name: 'Gamers Legacy',
+                img: '/img/Gamers-01.jpg',
+                url: '/clubs/gamers-legacy',
+                alt: 'Gamers Legacy Photo'
+            },
+            {
+                name: 'Tunners',
+                img: '/img/Tuners-03.jpg',
+                url: '/clubs/tunners',
+                alt: 'Tunners Photo'
+            },
+            {
+                name: 'El Warsha',
+                img: '/img/warsha-03.jpg',
+                url: '/clubs/el-warsha',
+                alt: 'El Warsha Photo'
+            },
+            {
+                name: 'MOVE',
+                img: '/img/Move-03.jpg',
+                url: '/clubs/move',
+                alt: 'MOVE Photo'
+            },
+            {
+                name: 'IHEPC',
+                img: '/img/IHEPC-03.jpg',
+                url: '/clubs/ihepc',
+                alt: 'IHEPC Photo'
+            }
+        ];
+        res.render('pages/index', { 
+            title: 'MIU Clubs & Organizations',
+            path: '/',
+            clubs
+        });
+    } catch (error) {
+        console.error('Error in home route:', error);
+        res.status(500).render('pages/error', {
+            title: 'Error',
+            message: 'An error occurred while loading the page',
+            error: process.env.NODE_ENV === 'development' ? error : {}
+        });
+    }
 });
 
 // Communities page

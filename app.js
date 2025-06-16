@@ -54,13 +54,14 @@ app.use('/admin', require('./server/routes/admin'));
 
 // Connect to MongoDB Atlas
 mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
     serverSelectionTimeoutMS: 5000 // Timeout after 5s instead of 30s
 }).then(() => {
     console.log('Connected to MongoDB Atlas');
     app.listen(PORT, '0.0.0.0', () => {
         console.log(`App listening on port ${PORT}`);
+        console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+        console.log(`MongoDB URI: ${process.env.MONGODB_URI ? 'Set' : 'Not set'}`);
+        console.log(`Session Secret: ${process.env.SESSION_SECRET ? 'Set' : 'Not set'}`);
     });
 }).catch((err) => {
     console.error('Failed to connect to MongoDB:', err);
@@ -76,4 +77,9 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', (err) => {
     console.error('Unhandled Rejection:', err);
     process.exit(1);
+});
+
+// Add a basic health check route
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
 });
