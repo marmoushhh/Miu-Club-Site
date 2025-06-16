@@ -53,11 +53,27 @@ app.use('/join-requests', require('./server/routes/joinRequest'));
 app.use('/admin', require('./server/routes/admin'));
 
 // Connect to MongoDB Atlas
-mongoose.connect(process.env.MONGODB_URI).then(() => {
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000 // Timeout after 5s instead of 30s
+}).then(() => {
     console.log('Connected to MongoDB Atlas');
     app.listen(PORT, '0.0.0.0', () => {
         console.log(`App listening on port ${PORT}`);
     });
 }).catch((err) => {
-    console.error('Failed to connect to MongoDB', err);
+    console.error('Failed to connect to MongoDB:', err);
+    process.exit(1); // Exit with failure
+});
+
+// Add error handling for uncaught exceptions
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (err) => {
+    console.error('Unhandled Rejection:', err);
+    process.exit(1);
 });
