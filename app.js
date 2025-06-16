@@ -10,7 +10,13 @@ const MongoStore = require('connect-mongo');
 const { setUserLocals } = require('./server/middleware/auth');
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+
+// Port configuration
+const PORT = process.env.PORT || 3000; // Default to 3000 for local development
+console.log('Environment:', process.env.NODE_ENV);
+console.log('Configured PORT:', PORT);
+console.log('Actual PORT from env:', process.env.PORT);
+
 // Enable CORS with specific options
 app.use(cors({
     origin: '*',
@@ -100,10 +106,13 @@ mongoose.connect(process.env.MONGODB_URI, {
 }).then(() => {
     console.log('Connected to MongoDB Atlas');
     app.listen(PORT, '0.0.0.0', () => {
+        console.log('=================================');
+        console.log(`Server is running in ${process.env.NODE_ENV || 'development'} mode`);
         console.log(`App listening on port ${PORT}`);
         console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
         console.log(`MongoDB URI: ${process.env.MONGODB_URI ? 'Set' : 'Not set'}`);
         console.log(`Session Secret: ${process.env.SESSION_SECRET ? 'Set' : 'Not set'}`);
+        console.log('=================================');
     });
 }).catch((err) => {
     console.error('Failed to connect to MongoDB:', err);
