@@ -10,7 +10,7 @@ const MongoStore = require('connect-mongo');
 const { setUserLocals } = require('./server/middleware/auth');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 // Enable CORS for all origins
 app.use(cors());
 app.use(express.static('public'));
@@ -22,7 +22,10 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
+    store: MongoStore.create({ 
+        mongoUrl: process.env.MONGODB_URI,
+        ttl: 24 * 60 * 60 // 1 day
+    }),
     cookie: {
         secure: process.env.NODE_ENV === 'production',
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
@@ -52,9 +55,24 @@ app.use('/auth', require('./server/routes/auth'));
 app.use('/join-requests', require('./server/routes/joinRequest'));
 app.use('/admin', require('./server/routes/admin'));
 
+// Basic health check route
+app.get('/health', (req, res) => {
+    res.status(200).json({ 
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        env: process.env.NODE_ENV,
+        port: PORT
+    });
+});
+
+// Test route
+app.get('/test', (req, res) => {
+    res.send('Test route working!');
+});
+
 // Connect to MongoDB Atlas
 mongoose.connect(process.env.MONGODB_URI, {
-    serverSelectionTimeoutMS: 5000 // Timeout after 5s instead of 30s
+    serverSelectionTimeoutMS: 5000
 }).then(() => {
     console.log('Connected to MongoDB Atlas');
     app.listen(PORT, '0.0.0.0', () => {
@@ -65,7 +83,7 @@ mongoose.connect(process.env.MONGODB_URI, {
     });
 }).catch((err) => {
     console.error('Failed to connect to MongoDB:', err);
-    process.exit(1); // Exit with failure
+    process.exit(1);
 });
 
 // Add error handling for uncaught exceptions
@@ -79,7 +97,12 @@ process.on('unhandledRejection', (err) => {
     process.exit(1);
 });
 
-// Add a basic health check route
-app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'ok' });
+// Add error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    res.status(500).render('pages/error', {
+        title: 'Error',
+        message: 'An error occurred',
+        error: process.env.NODE_ENV === 'development' ? err : {}
+    });
 });
